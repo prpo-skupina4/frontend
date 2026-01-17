@@ -13,7 +13,7 @@ export async function register(email, password, userId) {
   body.set("password", password);
   body.set("userId", userId);
 
-  const res = await fetch(`${USERS_URL}/register`, {//id, email
+  const res = await fetch(`${USERS_URL}/users`, {//id, email
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -110,7 +110,7 @@ export async function getFriends(userId){
   );
   if (!res.ok) throw new Error("Getting friend list failed");
   const data = await res.json();
-  return data
+  return data.items ?? [];
 }
 
 export async function optimizirajUrnik(userId, zahteve) {
