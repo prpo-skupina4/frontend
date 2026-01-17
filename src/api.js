@@ -2,9 +2,9 @@ import React from "react";
 
 const API = import.meta.env.VITE_API_URL;
 const HAS_API = typeof API === "string" && API.length > 0;
-export const URNIK_URL = HAS_API ? `${API}/auth` : "http://localhost:8002";
+export const URNIK_URL = HAS_API ? `${API}` : "http://localhost:8002";
 
-export const USERS_URL = HAS_API ? `${API}/users`: "http://localhost:8006/auth";
+export const USERS_URL = HAS_API ? `${API}/auth`: "http://localhost:8006/auth";
 
 export const BOOL_URL = HAS_API ? `${API}/bool`: "http://localhost:8004/bool";
 
