@@ -1,11 +1,17 @@
 import React from "react";
 
+const API = import.meta.env.VITE_API_URL;
+const HAS_API = typeof API === "string" && API.length > 0;
+export const URNIK_URL = HAS_API ? `${API}/auth` : "http://localhost:8002/auth";
 
-export const URNIK_URL = import.meta.env.URNIK_URL || "http://localhost:8002";
-export const USERS_URL = import.meta.env.USERS_OUT_URL || "http://localhost:8006/auth";
-export const BOOL_URL = import.meta.env.VITE_BOOLEAN_URL || "http://localhost:8004/bool";
-export const KOSILO_URL  = import.meta.env.VITE_KOSILO_URL  || "http://localhost:8005/kosilo";
-export const VREME_API = import.meta.env.VITE_VREME_URL ?? "http://localhost:8007/vreme";
+export const USERS_URL = HAS_API ? `${API}/users`: "http://localhost:8006";
+
+export const BOOL_URL = HAS_API ? `${API}/bool`: "http://localhost:8004/bool";
+
+export const KOSILO_URL = HAS_API ? `${API}/kosilo` : "http://localhost:8005/kosilo";
+
+export const VREME_API = HAS_API ? `${API}/vreme`: "http://localhost:8007/vreme";
+
 
 export async function register(email, password, userId) {
   const body = new URLSearchParams();
