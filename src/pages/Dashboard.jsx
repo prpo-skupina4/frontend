@@ -247,6 +247,7 @@ async function addAktivnost() {
     const fresh = await novTermin(userId, termin);
     setUrnik(fresh);
     setShowAddAkt(false);
+    await loadUrnik();
   } catch (e) {
     setError(e?.message || "Napaka pri dodajanju aktivnosti");
   } finally {

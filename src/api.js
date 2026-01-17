@@ -5,7 +5,7 @@ export const URNIK_URL = import.meta.env.URNIK_URL || "http://localhost:8002";
 export const USERS_URL = import.meta.env.USERS_OUT_URL || "http://localhost:8006/auth";
 export const BOOL_URL = import.meta.env.VITE_BOOLEAN_URL || "http://localhost:8004/bool";
 export const KOSILO_URL  = import.meta.env.VITE_KOSILO_URL  || "http://localhost:8005/kosilo";
-const VREME_API = import.meta.env.VITE_API_URL ?? "http://localhost:8007/vreme";
+export const VREME_API = import.meta.env.VITE_VREME_URL ?? "http://localhost:8007/vreme";
 
 export async function register(email, password, userId) {
   const body = new URLSearchParams();
@@ -56,7 +56,7 @@ export async function getUrnik(userId) {//prebere termin
   if (!Array.isArray(data.termini) || data.termini.length === 0) {
     console.log("prazen urnik")
     const token = localStorage.getItem("token");
-    const novUrnikRes = await fetch(`${URNIK_URL}/urniki/${userId}/dodaj`, {
+    const novUrnikRes = await fetch(`${URNIK_URL}/urniki/${userId}`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
@@ -75,7 +75,7 @@ export async function getUrnik(userId) {//prebere termin
 
 export async function novTermin(user_id, termin) {
   const token = localStorage.getItem("token");
-  const res = await fetch(`${URNIK_URL}/urniki/${user_id}/novTermin`, {
+  const res = await fetch(`${URNIK_URL}/urniki/${user_id}/termini`, {
     method: "POST",
     headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
     body: JSON.stringify(termin),
@@ -131,8 +131,8 @@ export async function optimizirajUrnik(userId, zahteve) {
 
 export async function shraniUrnik(userId, urnik) {
   const token = localStorage.getItem("token");
-  const res = await fetch(`${URNIK_URL}/urniki/${userId}/shrani`, {
-    method: "POST",
+  const res = await fetch(`${URNIK_URL}/urniki/${userId}`, {
+    method: "PUT",
     headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
     body: JSON.stringify(urnik),
   });
@@ -142,7 +142,7 @@ export async function shraniUrnik(userId, urnik) {
 
 export async function zdruziUrnik(userId, friendIds) {
    const ids = [Number(userId), ...friendIds.map(Number)];
-  const res = await fetch(`${BOOL_URL}/combine`, {
+  const res = await fetch(`${BOOL_URL}/`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -155,7 +155,7 @@ export async function zdruziUrnik(userId, friendIds) {
 
 export async function dodajKosilo(userId, dan, udelezenci) {
   const token = localStorage.getItem("token");
-  const res = await fetch(`${KOSILO_URL}/create`, {
+  const res = await fetch(`${KOSILO_URL}/`, {
     method: "POST",
     headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -170,7 +170,7 @@ export async function dodajKosilo(userId, dan, udelezenci) {
 
 export async function odstraniUrnik(userId) {
   const token = localStorage.getItem("token");
-  const res = await fetch(`${URNIK_URL}/urniki/${userId}/odstrani`, {
+  const res = await fetch(`${URNIK_URL}/urniki/${userId}`, {
     method: "DELETE",
     headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
   });
@@ -184,21 +184,29 @@ export function useWeekWeather() {
   const [werr, setWerr] = React.useState("");
 
   React.useEffect(() => {
-    let alive = true;
-
-    (async () => {
+    // 1) najprej poskusi iz sessionStorage
+    const cached = sessionStorage.getItem("weekWeather");
+    if (cached) {
       try {
-        setWerr("");
-        const res = await fetch(`${VREME_API}/`);
-        if (!res.ok) throw new Error(`Weather failed (${res.status})`);
-        const data = await res.json();
-        if (alive) setWeatherByDay(data || {});
-      } catch (e) {
-        if (alive) setWerr(e?.message || "Napaka pri vremenu");
+        setWeatherByDay(JSON.parse(cached));
+        return; // ✅ brez requesta
+      } catch {
+        sessionStorage.removeItem("weekWeather");
       }
-    })();
+    }
 
-    return () => { alive = false; };
+    // 2) sicer naredi en request
+    const url = `${VREME_API}/`;
+    fetch(url)
+      .then((r) => {
+        if (!r.ok) throw new Error(`Weather failed (${r.status})`);
+        return r.json();
+      })
+      .then((data) => {
+        setWeatherByDay(data || {});
+        sessionStorage.setItem("weekWeather", JSON.stringify(data || {})); // ✅ shrani
+      })
+      .catch((e) => setWerr(e?.message || "Weather error"));
   }, []);
 
   return { weatherByDay, werr };
