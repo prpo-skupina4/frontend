@@ -89,12 +89,11 @@ export async function novTermin(user_id, termin) {
 export async function addFriend(friendId, name) {
   const userId = localStorage.getItem("userId");
   const token = localStorage.getItem("token");
- const res = await fetch(`${USERS_URL}/friend`, {
+ const res = await fetch(`${USERS_URL}/users/${userId}/friends`, {
     method: "POST",
     headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
     body: JSON.stringify({
       friend_id: Number(friendId),
-      user_id: userId,
       name: name.trim(),
     }),
   });
@@ -106,7 +105,7 @@ export async function addFriend(friendId, name) {
 
 export async function getFriends(userId){
   const res = await fetch(
-    `${USERS_URL}/${userId}/friends`,
+    `${USERS_URL}/users/${userId}/friends`,
     { method: "GET" }
   );
   if (!res.ok) throw new Error("Getting friend list failed");
